@@ -5,6 +5,7 @@ import (
 	"log"
 	"log/syslog"
         "time"
+	"os/exec"
 )
 
 // The wrapper of your app
@@ -25,6 +26,17 @@ func yourApp(s server) {
 
 	// Notice that if this exits, the service continues to run
 	// You can launch web servers, etc.
+}
+
+
+
+
+func execute_cmd(thecmd)
+{    
+       c := exec.Command("cmd", "/C", "del", "D:\\a.txt")
+       if err := c.Run(); err != nil { 
+	   log(err,"Executing Command Failed - " + thecmd);
+	   }
 }
 
 func check_k_exist()
