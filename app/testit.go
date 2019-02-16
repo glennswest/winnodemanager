@@ -20,7 +20,6 @@ func GetWinVersion() string {
   thelines := lines(result);
 
 	verstr := standardizeSpaces(thelines[3]);
-	fmt.Printf("Line is: %s",verstr);
 	va := strings.Split(verstr," ");
 	ver := va[0] + "." + va[1] + "." + va[2] + "." + va[3];
 	return(ver);
@@ -37,12 +36,10 @@ func standardizeSpaces(s string) string {
 }
 
 func powershell(thecmd string) string {
-	c,err := exec.Command("powershell", "/C", "[System.Environment]::OSVersion.Version").CombinedOutput();
+	c,err := exec.Command("powershell", thecmd).CombinedOutput();
 	cmd := string(c);
-	fmt.Printf("c = %s", cmd);
 
 	if  err != nil {
-		  fmt.Printf("err = %d", err);
 	    return("");
     } else {
 	    return(cmd);
