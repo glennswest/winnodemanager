@@ -9,7 +9,18 @@ import(
 func main(){
   thever := GetWinVersion();
 	fmt.Printf("Windows Version = %s\n",thever);
+  check_windows_prereq();
+}
 
+func check_windows_prereq(){
+		check_ipv6();
+}
+
+func check_ipv6(){
+	regNamespace := "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip6\\Parameters";
+  cmd := "Get-ItemProperty -Path " + regNamespace + " -Name 'DisabledComponents' -ErrorAction SilentlyContinue";
+	result := powershell(cmd);
+	fmt.Printf("ipv6: %s->\n%s\n",cmd,result)
 }
 
 func GetWinVersion() string {
