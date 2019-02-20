@@ -14,13 +14,10 @@ func main(){
 }
 
 func check_windows_prereq(){
-		reset_needed := false;
-		result := check_ipv6();
-		if (result == true){
-			 reset_needed = true;
-		   }
-		if (reset_needed == true){
- 			reset_needed = false;
+		reset_needed := 0;
+		reset_needed =+ check_ipv6();
+		reset_needed =+ check_hyperv();
+		if (reset_needed > 0){
  			PsReset();
  			}
 }
@@ -29,16 +26,28 @@ func PsReset(){
 	fmt.Printf("Reseting\n");
 }
 
-func check_ipv6() bool {
+func check_ipv6() int {
 	thenamespace := "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip6\\Parameters";
 	thevalue := GetPsRegValue(thenamespace,"DisabledComponents");
 	if (thevalue == ""){ // Its not disabled}
 	    // Lets Disable it
 			fmt.Printf("Disable IPV6\n");
 			SetPSRegValue(thenamespace,"DisabledComponents","0xffffffff","DWord");
-      return(true);
+      return(1);
 		}
-	return(false);
+	return(0);
+}
+
+func check_hyperv() int {
+	thevalue := GetPsInstalled("Hyper-V");
+	if (thevalue == "Installed"){
+		 // Disable HyberV
+		 cmd := "bcdedit.exe /set hypervisorlaunchtype off";
+		 result := powershell(cmd);
+		 fmt.Printf("%s\n%s\n",cmd,result);
+		 return(1);
+	   }
+	return(0);
 }
 
 func GetLineArray(theresult string ,thelinenum int ) [] string {
@@ -46,6 +55,13 @@ func GetLineArray(theresult string ,thelinenum int ) [] string {
 	output := standardizeSpaces(thelines[thelinenum]);
 	varvals := strings.Split(output," ");
 	return(varvals);
+}
+
+func GetPsInstalled(thepackage string) string {
+	cmd := "Get-WindowsFeature -Name '" + thepackage + "'";
+	result := powershell(cmd);
+	varvals := GetLineArray(result,3);
+	return(varvals[4]);
 }
 
 func GetPsRegValue(thenamespace string,thevaluename string) string {
