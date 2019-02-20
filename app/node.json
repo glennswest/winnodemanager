@@ -1,0 +1,12 @@
+{
+  host: {
+    name: "winnode01",
+    fqdn: "winnode01.green.k.e2e.bos.redhat.com",
+    }
+  services: {
+    logging: "ctl.k.e2e.bos.redhat.com",
+    library: "ctl.k.e2e.bos.redhat.com",
+  }
+  master: "openshift.green.k.e2e.bos.redhat.com"
+  }
+}

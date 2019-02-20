@@ -17,6 +17,7 @@ func check_windows_prereq(){
 		reset_needed := 0;
 		reset_needed =+ check_ipv6();
 		reset_needed =+ check_hyperv();
+		reset_needed =+ check_name();
 		if (reset_needed > 0){
  			PsReset();
  			}
@@ -50,11 +51,24 @@ func check_hyperv() int {
 	return(0);
 }
 
+func check_name() int {
+	hostname := GetPsHostName();
+	fmt.Printf("Hostname: %s\n",hostname);
+	return(0);
+}
+
 func GetLineArray(theresult string ,thelinenum int ) [] string {
 	thelines := lines(theresult);
 	output := standardizeSpaces(thelines[thelinenum]);
 	varvals := strings.Split(output," ");
 	return(varvals);
+}
+
+func GetPsHostName() string {
+	cmd := "$env:COMPUTERNAME";
+	result := powershell(cmd);
+	fmt.Printf("%s\n%s\n",cmd,result);
+	return(result);
 }
 
 func GetPsInstalled(thepackage string) string {
