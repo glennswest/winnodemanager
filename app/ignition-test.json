@@ -1,0 +1,28 @@
+{
+  "ignition" : {
+    "version" : "2.2.0"
+  },
+  "storage" : {
+    "files" : [
+      {
+        "filesystem" : "root",
+        "path" : "./foo/bar1",
+        "mode" : 420,
+        "contents" : {
+          "source" : "data:,example%20file%0A"
+        }
+      },
+      {
+        "filesystem" : "root",
+        "path" : "./foo/openvswitch-hyperv-installer-beta.msi",
+        "mode" : 420,
+        "contents" : {
+          "source" : "https://cloudbase.it/downloads/openvswitch-hyperv-installer-beta.msi",
+          "verification" : {
+            "hash" : "sha512-0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+          }
+        }
+      }
+    ]
+  }
+}
