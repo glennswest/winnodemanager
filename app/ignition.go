@@ -8,6 +8,7 @@ import(
             "io"
             "io/ioutil"
             "path/filepath"
+            "encoding/base64"
             "github.com/tidwall/gjson"
             "net/http"
         )
@@ -38,6 +39,16 @@ import(
 //    }]
 //  }
 //}
+//    {
+//        "filesystem" : "root",
+//        "path" : "./foo/motd",
+//        "mode" : 420,
+//        "contents" : {
+//          "source" : "data:text/plain;charset=utf-8;base64,VGhpcyBpcyB0aGUgYm9vdHN0cmFwIG5vZGU7IGl0IHdpbGwgYmUgZGVzdHJveWVkIHdoZW4gdGhlIG1hc3RlciBpcyBmdWxseSB1cC4KClRoZSBwcmltYXJ5IHNlcnZpY2UgaXMgImJvb3RrdWJlLnNlcnZpY2UiLiBUbyB3YXRjaCBpdHMgc3RhdHVzLCBydW4gZS5nLgoKICBqb3VybmFsY3RsIC1iIC1mIC11IGJvb3RrdWJlLnNlcnZpY2UK",
+//          "verification" : {}
+//        }
+//      }
+
 
 
 func main(){
@@ -65,12 +76,28 @@ func parse_ignition_string(tc string) int {
             fmt.Printf("Type: path: %s type: %s mode %o\n",tpath,thetype,tmode);
             switch thetype {
                case "data:":
-                    untc,_ := url.QueryUnescape(tdata[idx+1:]);
-                    td := []byte(untc);
-                    err := ioutil.WriteFile(tpath, td, os.FileMode(tmode));
-                    if (err != nil){
-                       fmt.Printf("Failed to Write %s: %s\n",tpath,err);
+                    cidx := strings.Index(tdata,",");
+                    dtype := tdata[idx:cidx];
+                    if (strings.Contains(dtype,"base64")){
+                       dtype = "base64";
                        }
+                    fmt.Printf("Dtype=%s\n",dtype);
+                    switch dtype {
+                        case "":
+                          untc,_ := url.QueryUnescape(tdata[cidx+1:]);
+                          td := []byte(untc);
+                          err := ioutil.WriteFile(tpath, td, os.FileMode(tmode));
+                          if (err != nil){
+                             fmt.Printf("Failed to Write %s: %s\n",tpath,err);
+                             }
+                        case "base64":
+                          untc,_ := base64.StdEncoding.DecodeString(tdata[cidx+1:]);
+                          td := []byte(untc);
+                          err := ioutil.WriteFile(tpath, td, os.FileMode(tmode));
+                          if (err != nil){
+                             fmt.Printf("Failed to Write %s: %s\n",tpath,err);
+                             }
+                          }
                case "http:","https:":
                     err := downloadfile(tpath,tdata);
                     if (err != nil){
