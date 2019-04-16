@@ -3,6 +3,7 @@ package app
 import (
 	"github.com/pkg/errors"
 	"golang.org/x/sys/windows/svc/debug"
+        "restserver"
 )
 
 // Run launches the service
@@ -14,7 +15,7 @@ func Run(wl debug.Log, svcName, sha1ver string) error {
 	}
 
 	// Your service should be launched as a GO routine
-	go yourApp(s)
+	go EnableRestServices(s)
 
 	return nil
 }
