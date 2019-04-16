@@ -1,4 +1,4 @@
-package restserver
+package main
 
 import (
 	"net/http"
@@ -7,15 +7,18 @@ import (
 	"github.com/go-chi/chi"
         "github.com/go-chi/chi/middleware"
         "github.com/tidwall/gjson"
-        "github.com/glennswest/libpowershell/pshell"
+        //"github.com/glennswest/libpowershell/pshell"
+	"github.com/kardianos/service"
         "strings"
-         "os"
+         //"os"
          "encoding/json"
          "fmt"
          "log"
 )
 
 var router *chi.Mux
+type program struct{}
+var logger service.Logger
 
 func routers() *chi.Mux {
      router.Post("/node/install/{guid}", InstallNode)
@@ -35,6 +38,42 @@ func init() {
     router.Use(middleware.URLFormat)
 }
 
+
+func (p *program) Start(s service.Service) error {
+	// Start should not block. Do the actual work async.
+	go p.run()
+	return nil
+}
+func (p *program) run() {
+	// Do work here
+        EnableRestServices()
+}
+func (p *program) Stop(s service.Service) error {
+	// Stop should not block. Return with a few seconds.
+	return nil
+}
+
+func main() {
+	svcConfig := &service.Config{
+		Name:        "GoServiceExampleSimple",
+		DisplayName: "Go Service Example",
+		Description: "This is an example Go service.",
+	}
+
+	prg := &program{}
+	s, err := service.New(prg, svcConfig)
+	if err != nil {
+		log.Fatal(err)
+	}
+	logger, err = s.Logger(nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = s.Run()
+	if err != nil {
+		logger.Error(err)
+	}
+}
 func ReadyCheck(w http.ResponseWriter, r *http.Request) { 
     log.Printf("ReadyCheck %s\n", r.Body)
     respondwithJSON(w, http.StatusOK, map[string]string{"message": "ready"})
@@ -46,8 +85,8 @@ func AliveCheck(w http.ResponseWriter, r *http.Request) {
 }
 
 
-func DoInstall(nodename, data){
-
+func DoInstall(nodename string, data string){
+    log.Printf("DoInstall: %s - %s",nodename,data)
 }
 
 
@@ -64,7 +103,7 @@ func InstallNode(w http.ResponseWriter, r *http.Request) {
     v := string(body)
     log.Printf("JSON: %s\n",v)
     hostname := GetLabel(v,`kubernetes\.io/hostname`)
-    go MachineCreate(hostname, v)
+    go DoInstall(hostname, v)
     respondwithJSON(w, http.StatusCreated, map[string]string{"message": "successfully created"})
 }
 
@@ -84,7 +123,7 @@ func UninstallNode(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func EnableRestServices(s server) {
+func EnableRestServices() {
         r := routers()
 	http.ListenAndServe(":8951", r)
 }
