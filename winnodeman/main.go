@@ -38,7 +38,6 @@ func init() {
 }
 
 
-var logger service.Logger
 
 type program struct{}
 
@@ -78,13 +77,18 @@ func main() {
 		return
 	}
 
-	logger, err = s.Logger(nil)
-	if err != nil {
-		log.Fatal(err)
-	}
+        os.MkdirAll("/Program Files/WindowsNodeManager/logs",0755)
+        f, err := os.OpenFile("testlogfile", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
+        if err != nil {
+            log.Fatalf("error opening file: %v", err)
+            }
+        defer f.Close()
+
+        log.SetOutput(f)
+        log.Println("winnodemanager restarted")
 	err = s.Run()
 	if err != nil {
-		logger.Error(err)
+		log.Fatalf("Cannot Run: %v",err)
 	}
 }
 
