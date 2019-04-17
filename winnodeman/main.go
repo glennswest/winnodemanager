@@ -78,7 +78,7 @@ func main() {
 	}
 
         os.MkdirAll("/Program Files/WindowsNodeManager/logs",0755)
-        f, err := os.OpenFile("testlogfile", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
+        f, err := os.OpenFile("/Program Files/WindowsNodeManager/logs/winnodeman.log", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
         if err != nil {
             log.Fatalf("error opening file: %v", err)
             }
