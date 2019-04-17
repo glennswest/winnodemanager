@@ -10,18 +10,14 @@ import (
         //"github.com/glennswest/libpowershell/pshell"
 	"github.com/kardianos/service"
         "strings"
-         //"os"
+         "os"
          "encoding/json"
          "fmt"
          "log"
+         "time"
 )
 
 var router *chi.Mux
-
-var logSrv service.Logger
-var name = "winnodeman"
-var displayName = "winnodeman"
-var desc = "OpenShift 4.0 Windows Node Manager"
 
 func routers() *chi.Mux {
      router.Post("/node/install/{guid}", InstallNode)
@@ -42,6 +38,10 @@ func init() {
 }
 
 
+var logger service.Logger
+
+type program struct{}
+
 func (p *program) Start(s service.Service) error {
 	// Start should not block. Do the actual work async.
 	go p.run()
@@ -49,73 +49,45 @@ func (p *program) Start(s service.Service) error {
 }
 func (p *program) run() {
 	// Do work here
-        EnableRestServices()
+        go EnableRestServices()
 }
+
 func (p *program) Stop(s service.Service) error {
 	// Stop should not block. Return with a few seconds.
+	<-time.After(time.Second * 13)
 	return nil
 }
 
 func main() {
-        s, err: = service.NewService (name, displayName, desc)
-	if err! = nil {
-		fmt.Printf ("% s unable to start:% s", displayName, err)
-		return
+	svcConfig := &service.Config{
+		Name:        "winnodeman",
+		DisplayName: "WindowsNodeManager",
+		Description: "OpenShift 4.x Windows Node Manager - Handles install update and monitoring",
 	}
-	logSrv = s
 
-	if len (os.Args)> 1 {
-		var err error
-		verb: = os.Args [1]
-		switch verb {
-		case "install":
-			err = s.Install ()
-			if err! = nil {
-				fmt.Printf ("Failed to install:% s \ n", err)
-				return
-			}
-			fmt.Printf ("Service \"% s \ "installed. \ n", displayName)
-		case "remove":
-			err = s.Remove ()
-			if err! = nil {
-				fmt.Printf ("Failed to remove:% s \ n", err)
-				return
-			}
-			fmt.Printf ("Service \"% s \ "removed. \ n", displayName)
-		case "run":
-			isService = false
-			DoWork ()
-		case "start":
-			err = s.Start ()
-			if err! = nil {
-				fmt.Printf ("Failed to start:% s \ n", err)
-				return
-			}
-			fmt.Printf ("Service \"% s \ "started. \ n", displayName)
-		case "stop":
-			err = s.Stop ()
-			if err! = nil {
-				fmt.Printf ("Failed to stop:% s \ n", err)
-				return
-			}
-			fmt.Printf ("Service \"% s \ "stopped. \ n", displayName)
+	prg := &program{}
+	s, err := service.New(prg, svcConfig)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if len(os.Args) > 1 {
+		err = service.Control(s, os.Args[1])
+		if err != nil {
+			log.Fatal(err)
 		}
 		return
 	}
-	err = s.Run (func () error {
-		// start
-		go doWork ()
-		return nil
-	}, func () error {
-		// stop
-		stopWork ()
-		return nil
-	})
-	if err! = nil {
-		s.Error (err.Error ())
+
+	logger, err = s.Logger(nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = s.Run()
+	if err != nil {
+		logger.Error(err)
 	}
 }
-}
+
 func ReadyCheck(w http.ResponseWriter, r *http.Request) { 
     log.Printf("ReadyCheck %s\n", r.Body)
     respondwithJSON(w, http.StatusOK, map[string]string{"message": "ready"})
