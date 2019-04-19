@@ -103,8 +103,79 @@ func AliveCheck(w http.ResponseWriter, r *http.Request) {
 }
 
 
+func DownloadFile(theurl string, filepath string) error{
+// Create the file
+  log.Printf("DownloadFile: %s -> %s\n",theurl,filepath)
+  out, err := os.Create(filepath)
+  if err != nil  {
+    log.Printf("Cannot Create File: %v\n",err)
+    return err
+  }
+  defer out.Close()
+
+  // Get the data
+  resp, err := http.Get(theurl)
+  if err != nil {
+    log.Printf("Cannot Get File: %v\n",err)
+    return err
+  }
+  defer resp.Body.Close()
+
+  // Check server response
+  if resp.StatusCode != http.StatusOK {
+    log.Printf("Bad Response downloading file: %s\n",resp.Status)
+    return fmt.Errorf("bad status: %s", resp.Status)
+  }
+
+  // Writer the body to file
+  _, err = io.Copy(out, resp.Body)
+  if err != nil  {
+    log.Printf("Cannot Copy File: %v\n",err)
+    return err
+  }
+  return nil
+
+}
+
+func ReadFile(thepath string) string {
+    b, err := ioutil.ReadFile(thepath) // just pass the file name
+    if err != nil {
+        log.Print(err)
+        return ""
+    }
+    str := string(b)
+   return str
+}
 func DoInstall(nodename string, data string){
+    basepath := "/Program` Files/WindowsNodeManager"
+    os.MkdirAll(basepath + "/settings",0700)
+    os.MkdirAll(basepath + "/content",0700)
     log.Printf("DoInstall: %s - %s",nodename,data)
+    urlbase := GetSetting(data,"wmmurl")
+    template := GetSetting(data,"template")
+    urltemplate := "http://" + urlbase + template
+    templatepath := basepath + "/settings/template.json"
+    log.Printf("Getting template: %s\n",urltemplate)
+    err := DownloadFile(urltemplate,templatepath)
+    if err != nil {
+       log.Printf("Cannot download template")
+       return
+       }
+    tdata := ReadFile(templatepath)
+    log.Printf("Template: %s\n",tdata)
+    gjson.ForEachLine(tdata, func(line gjson.Result) bool{
+          component := line.String()
+          cpath := basepath + "/content/" + component
+          curl  := urlbase + "/content/" + component
+          err := DownloadFile(curl,cpath)
+          if err != nil {
+             log.Printf("Cannot Download %s - %v\n",component,err)
+             return false
+             }
+          return true
+          })
+    log.Printf("All Components Downloaded\n")
+
 }
 
 
