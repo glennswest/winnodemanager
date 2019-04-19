@@ -88,7 +88,7 @@ func main() {
         defer f.Close()
 
         log.SetOutput(f)
-        log.Println("winnodemanager restarted - Version: %s - Build Data: %s",gitversion,builddate)
+        log.Printf("winnodemanager restarted - Version: %s - Build Data: %s",gitversion,builddate)
 	err = s.Run()
 	if err != nil {
 		log.Fatalf("Cannot Run: %v",err)
@@ -150,7 +150,7 @@ func ReadFile(thepath string) string {
    return str
 }
 func DoInstall(nodename string, data string){
-    basepath := "/Program` Files/WindowsNodeManager"
+    basepath := "/Program Files/WindowsNodeManager"
     os.MkdirAll(basepath + "/settings",0700)
     os.MkdirAll(basepath + "/content",0700)
     log.Printf("DoInstall: %s - %s",nodename,data)
@@ -166,8 +166,10 @@ func DoInstall(nodename string, data string){
        }
     tdata := ReadFile(templatepath)
     log.Printf("Template: %s\n",tdata)
-    gjson.ForEachLine(tdata, func(line gjson.Result) bool{
-          component := line.String()
+    result := gjson.Get(json, "packages.#")
+    for _, name := range result.Array() {
+          component := name.String()
+          log.Printf("Processing Component: %s\n",component)
           cpath := basepath + "/content/" + component
           curl  := urlbase + "/content/" + component
           err := DownloadFile(curl,cpath)
