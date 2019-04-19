@@ -166,7 +166,7 @@ func DoInstall(nodename string, data string){
        }
     tdata := ReadFile(templatepath)
     log.Printf("Template: %s\n",tdata)
-    result := gjson.Get(json, "packages.#")
+    result := gjson.Get(tdata, "packages.#")
     for _, name := range result.Array() {
           component := name.String()
           log.Printf("Processing Component: %s\n",component)
