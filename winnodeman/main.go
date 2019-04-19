@@ -17,6 +17,9 @@ import (
          "time"
 )
 
+var builddate string
+var gitversion string 
+
 var router *chi.Mux
 
 func routers() *chi.Mux {
@@ -85,7 +88,7 @@ func main() {
         defer f.Close()
 
         log.SetOutput(f)
-        log.Println("winnodemanager restarted")
+        log.Println("winnodemanager restarted - Version: %s - Build Data: %s",gitversion,builddate)
 	err = s.Run()
 	if err != nil {
 		log.Fatalf("Cannot Run: %v",err)
