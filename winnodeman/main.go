@@ -171,7 +171,7 @@ func DoInstall(nodename string, data string){
           component := name.String()
           log.Printf("Processing Component: %s\n",component)
           cpath := basepath + "/content/" + component + ".ign"
-          curl  := urlbase + "/content/" + component + ".ign"
+          curl  := "http://" + urlbase + "/content/" + component + ".ign"
           err := DownloadFile(curl,cpath)
           if err != nil {
              log.Printf("Cannot Download %s - %v\n",component,err)
