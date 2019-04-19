@@ -176,7 +176,7 @@ func DoInstall(nodename string, data string){
           if err != nil {
              log.Printf("Cannot Download %s - %v\n",component,err)
              }
-          )
+          }
     log.Printf("All Components Downloaded\n")
 
 }
