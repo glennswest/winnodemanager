@@ -166,12 +166,12 @@ func DoInstall(nodename string, data string){
        }
     tdata := ReadFile(templatepath)
     log.Printf("Template: %s\n",tdata)
-    result := gjson.Get(tdata, "packages.#")
+    result := gjson.Get(tdata, "packages")
     for _, name := range result.Array() {
           component := name.String()
           log.Printf("Processing Component: %s\n",component)
-          cpath := basepath + "/content/" + component
-          curl  := urlbase + "/content/" + component
+          cpath := basepath + "/content/" + component + ".ign"
+          curl  := urlbase + "/content/" + component + ".ign"
           err := DownloadFile(curl,cpath)
           if err != nil {
              log.Printf("Cannot Download %s - %v\n",component,err)
