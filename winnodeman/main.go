@@ -175,10 +175,8 @@ func DoInstall(nodename string, data string){
           err := DownloadFile(curl,cpath)
           if err != nil {
              log.Printf("Cannot Download %s - %v\n",component,err)
-             return false
              }
-          return true
-          })
+          )
     log.Printf("All Components Downloaded\n")
 
 }
