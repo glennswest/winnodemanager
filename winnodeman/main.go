@@ -184,7 +184,7 @@ func DoInstall(nodename string, data string){
           log.Printf("Using Ignition to Deploy: %s\n",component)
           cpath := basepath + "/content/" + component + ".ign"
           status := ignition.Parse_ignition_file(cpath)
-          if (status == 0){
+          if (status != 0){
              log.Printf("Failed Deployment for component %s\n",component)
              }
           }
