@@ -7,7 +7,7 @@ import (
 	"github.com/go-chi/chi"
         "github.com/go-chi/chi/middleware"
         "github.com/tidwall/gjson"
-        //"github.com/glennswest/libpowershell/pshell"
+        "github.com/glennswest/libignition/ignition"
 	"github.com/kardianos/service"
         "strings"
          "os"
@@ -178,7 +178,16 @@ func DoInstall(nodename string, data string){
              }
           }
     log.Printf("All Components Downloaded\n")
-
+    log.Printf("Starting deployment of ignition files\n")
+    for _, name := range result.Array() {
+          component := name.String()
+          log.Printf("Using Ignition to Deploy: %s\n",component)
+          cpath := basepath + "/content/" + component + ".ign"
+          status := ignition.Parse_ignition_file(cpath)
+          if (status == 0){
+             log.Printf("Failed Deployment for %s\n",component)
+             }
+          }
 }
 
 
