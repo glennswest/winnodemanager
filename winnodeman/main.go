@@ -271,3 +271,31 @@ func GetSetting(v string,l string) string{
     return x
 }
 
+func SshCommand(host string,username string,keypath string,cmds []string) []string{
+var sshout[] string
+
+    hp := host
+    if (strings.ContainsAny(hp,":") == false){
+       hp = host + ":22"
+       }
+    // Keypath should be pathname of private key
+    client, err := DialWithKey(hp, username, keypath)
+    if (err != nil){
+       log.Printf("SSHCommand: Cannot Connect to %s - %v\n",host,err)
+       return(sshout)
+       }
+    defer client.Close()
+    for _, c := range cmds {
+       log.Printf("SSH: %s\n",c)
+       out, err := client.Cmd("ls").Output()
+       if err != nil {
+          log.Printf("Cannot run cmd - %v\n",err)
+          return(sshout)
+          }
+       fmt.Println("> %s\n",string(out))
+       sshout = append(sshout,string(out))
+       }
+    return(sshout)
+}
+
+
