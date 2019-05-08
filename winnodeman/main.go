@@ -9,6 +9,7 @@ import (
         "github.com/tidwall/gjson"
         "github.com/glennswest/libignition/ignition"
 	"github.com/kardianos/service"
+        . "github.com/glennswest/go-sshclient"
         "strings"
          "os"
          "encoding/json"
@@ -188,8 +189,51 @@ func DoInstall(nodename string, data string){
              log.Printf("Failed Deployment for component %s\n",component)
              }
           }
+    log.Printf("Starting Command Execution from Components\n")
+    for _, name := range result.Array() {
+          component := name.String()
+          log.Printf("Pulling metadata for component: %s\n",component)
+          mpath := "/bin/metadata/" + component + ".metadata"
+          md := ReadFile(mpath)
+          if (len(md) > 0){
+             process_install_metadata(nodename,data,component,md)
+             } else {
+             log.Printf("Missing metadata for component: %s\n",component)
+             }
+          }
+
 }
 
+func process_install_metadata(nodename string,d string,cname string,md string){
+     log.Printf("Processing %s metadata - %s\n",cname,md)
+     description := gjson.Get(md,"description").String()
+     imessage := gjson.Get(md,"install_message").String()
+     url      := gjson.Get(md,"package_url").String()
+     if (len(description) > 0){
+        log.Printf("Component: %s\n", description)
+        }
+     if (len(imessage) > 0){
+        log.Printf("%s\n",imessage)
+        }
+     if (len(url) > 0){
+        log.Printf("Using content from: %s\n",url)
+        }
+     lprecmds := gjson.Get(md,"install.lprecmds").Array()
+     commands := gjson.Get(md,"install.commands").Array()
+     lpstcmds := gjson.Get(md,"install.lpstcmds").Array()
+     process_master_commands(lprecmds,nodename,d,cname,md)
+     process_local_commands(commands,nodename,d,cname,md)
+     process_master_commands(lpstcmds,nodename,d,cname,md)
+}
+
+func process_master_commands(cmds []gjson.Result,nodename string,d string,cname string,md string){
+    log.Printf("Processing Master Commands - Qty %d\n",len(cmds))
+
+}
+
+func process_local_commands(cmds []gjson.Result,nodename string,d string,cname string,md string){
+    log.Printf("Processing Local Commands - Qty %d\n",len(cmds))
+}
 
 // Install a New Machine
 func InstallNode(w http.ResponseWriter, r *http.Request) { 
