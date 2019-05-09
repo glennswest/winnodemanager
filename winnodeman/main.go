@@ -10,6 +10,7 @@ import (
         "github.com/glennswest/libignition/ignition"
 	"github.com/kardianos/service"
         . "github.com/glennswest/go-sshclient"
+	"gopkg.in/natefinch/lumberjack.v2"
         "strings"
          "os"
          "encoding/json"
@@ -82,13 +83,13 @@ func main() {
 	}
 
         os.MkdirAll("/Program Files/WindowsNodeManager/logs",0755)
-        f, err := os.OpenFile("/Program Files/WindowsNodeManager/logs/winnodeman.log", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
-        if err != nil {
-            log.Fatalf("error opening file: %v", err)
-            }
-        defer f.Close()
-
-        log.SetOutput(f)
+        log.SetOutput(&lumberjack.Logger{
+                Filename:   "/Program Files/WindowsNodeManager/logs/winnodeman.log",
+                MaxSize:    10, // megabytes
+                MaxBackups: 6,
+                MaxAge:     1, // days
+                Compress:   true, // disabled by default
+                })
         log.Printf("winnodemanager restarted - Version: %s - Build Data: %s",gitversion,builddate)
 	err = s.Run()
 	if err != nil {
