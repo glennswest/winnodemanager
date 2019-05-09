@@ -205,7 +205,7 @@ func DoInstall(nodename string, data string){
 }
 
 func process_install_metadata(nodename string,d string,cname string,md string){
-     log.Printf("Processing %s metadata - %s\n",cname,md)
+     log.Printf("Processing %s metadata %s\n",cname)
      description := gjson.Get(md,"description").String()
      imessage := gjson.Get(md,"install_message").String()
      url      := gjson.Get(md,"package_url").String()
@@ -227,12 +227,20 @@ func process_install_metadata(nodename string,d string,cname string,md string){
 }
 
 func process_master_commands(cmds []gjson.Result,nodename string,d string,cname string,md string){
-    log.Printf("Processing Master Commands - Qty %d\n",len(cmds))
+    l := len(cmds)
+    if (l == 0){
+       return
+       }
+    log.Printf("Processing Master Commands - Qty %d\n",l)
 
 }
 
 func process_local_commands(cmds []gjson.Result,nodename string,d string,cname string,md string){
-    log.Printf("Processing Local Commands - Qty %d\n",len(cmds))
+    l := len(cmds)
+    if (l == 0){
+       return
+       }
+    log.Printf("Processing Local Commands - Qty %d\n",l)
 }
 
 // Install a New Machine
