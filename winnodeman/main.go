@@ -10,6 +10,7 @@ import (
         "github.com/glennswest/libignition/ignition"
 	"github.com/kardianos/service"
         . "github.com/glennswest/go-sshclient"
+        b64 "encoding/base64"
 	"gopkg.in/natefinch/lumberjack.v2"
         "strings"
          "os"
@@ -206,7 +207,7 @@ func DoInstall(nodename string, data string){
 }
 
 func process_install_metadata(nodename string,d string,cname string,md string){
-     log.Printf("Processing %s metadata %s\n",cname)
+     log.Printf("Processing %s metadata\n",cname)
      description := gjson.Get(md,"description").String()
      imessage := gjson.Get(md,"install_message").String()
      url      := gjson.Get(md,"package_url").String()
@@ -222,26 +223,47 @@ func process_install_metadata(nodename string,d string,cname string,md string){
      lprecmds := gjson.Get(md,"install.lprecmds").Array()
      commands := gjson.Get(md,"install.commands").Array()
      lpstcmds := gjson.Get(md,"install.lpstcmds").Array()
-     process_master_commands(lprecmds,nodename,d,cname,md)
-     process_local_commands(commands,nodename,d,cname,md)
-     process_master_commands(lpstcmds,nodename,d,cname,md)
+     process_master_commands(lprecmds,nodename,d,cname,md,"lprecmds")
+     process_local_commands(commands,nodename,d,cname,md,"commands")
+     process_master_commands(lpstcmds,nodename,d,cname,md,"lpstcmds")
 }
 
-func process_master_commands(cmds []gjson.Result,nodename string,d string,cname string,md string){
+func process_master_commands(cmds []gjson.Result,nodename string,d string,cname string,md string,itype string){
+var script[] string
+
     l := len(cmds)
     if (l == 0){
        return
        }
     log.Printf("Processing Master Commands - Qty %d\n",l)
+    os.MkdirAll("/Program Files/WindowsNodeManager/install/" + cname + "/" + itype,0755)
+    // Fixme: Should add environment setup here
+    log.Printf("script\n")
+    for _, cmd := range cmds {
+          script = append(script,cmd.String())
+          log.Printf("    %s\n",cmd.String())
+          }
 
+    host := GetSetting(d,"global.master")
+    username := GetSetting(d,"global.sshuser")
+    sshkey_path := "/Program Files/WindowsNodeManager/install/id"
+    sshkeyb64 := GetSetting(d,"sshkey")
+    sshkeybytes, _ := b64.StdEncoding.DecodeString(sshkeyb64)
+    ioutil.WriteFile(sshkey_path, sshkeybytes, 0600)
+    result := SshCommand(host,username,sshkey_path,script)
+    os.Remove(sshkey_path)
+    outpath := "/Program Files/WindowsNodeManager/install/" + cname + "/" + itype + "/output.log"
+    out := strings.Join(result,"\n")
+    ioutil.WriteFile(outpath, []byte(out), 0600)
 }
 
-func process_local_commands(cmds []gjson.Result,nodename string,d string,cname string,md string){
+func process_local_commands(cmds []gjson.Result,nodename string,d string,cname string,md string,itype string){
     l := len(cmds)
     if (l == 0){
        return
        }
     log.Printf("Processing Local Commands - Qty %d\n",l)
+    os.MkdirAll("/Program Files/WindowsNodeManager/install/" + cname + "/" + itype,0755)
 }
 
 // Install a New Machine
@@ -340,7 +362,7 @@ var sshout[] string
     defer client.Close()
     for _, c := range cmds {
        log.Printf("SSH: %s\n",c)
-       out, err := client.Cmd("ls").Output()
+       out, err := client.Cmd(c).Output()
        if err != nil {
           log.Printf("Cannot run cmd - %v\n",err)
           return(sshout)
