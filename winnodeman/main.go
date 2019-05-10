@@ -228,6 +228,63 @@ func process_install_metadata(nodename string,d string,cname string,md string){
      process_master_commands(lpstcmds,nodename,d,cname,md,"lpstcmds")
 }
 
+func trimQuotes(s string) string {
+    if len(s) >= 2 {
+        if s[0] == '"' && s[len(s)-1] == '"' {
+            return s[1 : len(s)-1]
+        }
+    }
+    return s
+}
+
+func getkeyvalue(d string) (string, string) {
+    x := strings.Replace(d,"{","",-1)
+    x = strings.Replace(x,"}","",-1)
+    result := strings.Split(x, ":")
+    k := trimQuotes(result[0])
+    v := trimQuotes(result[1])
+    return k,v
+}
+
+func processvars(d string,vtype string) []string{
+var r[] string
+
+    result := gjson.Get(d, vtype)
+    result.ForEach(func(key, value gjson.Result) bool {
+       k,v := getkeyvalue(value.String())
+       switch(k){
+          case "user":
+                break;
+          case "password":
+                break;
+          case "sshuser":
+                break;
+          case "sshkey":
+                break;
+          default:
+                k = strings.Replace(k,".","_",-1)
+                k = strings.Replace(k,"/","_",-1)
+                l := "export " + k + "=" + `"` + v + `"`
+                r = append(r,l)
+                }
+       return true
+       })
+    return(r)
+
+}
+
+func envars(d string) []string{
+var  r[] string
+
+    r  = processvars(d,"settings")
+    l := processvars(d,"labels")
+    a := processvars(d,"annotations")
+    r  = append(r,l...)
+    r  = append(r,a...)
+    return(r)
+}
+
+
 func process_master_commands(cmds []gjson.Result,nodename string,d string,cname string,md string,itype string){
 var script[] string
 
@@ -237,7 +294,8 @@ var script[] string
        }
     log.Printf("Processing Master Commands - Qty %d\n",l)
     os.MkdirAll("/Program Files/WindowsNodeManager/install/" + cname + "/" + itype,0755)
-    // Fixme: Should add environment setup here
+    env := envars(d)
+    script = append(script,env...)
     log.Printf("script\n")
     for _, cmd := range cmds {
           script = append(script,cmd.String())
