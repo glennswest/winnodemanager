@@ -27,7 +27,7 @@ var router *chi.Mux
 
 func routers() *chi.Mux {
      router.Post("/node/install/{guid}", InstallNode)
-     router.Post("/data", StoreData)
+     router.Post("/data/{filename}", StoreData)
      router.Delete("/node/uninstall/{guid}", UninstallNode)
      router.Put("/node/update/{guid}", UpdateNode)
      router.Get("/healthz",ReadyCheck)
@@ -328,6 +328,8 @@ func process_local_commands(cmds []gjson.Result,nodename string,d string,cname s
 
 func StoreData(w http.ResponseWriter, r *http.Request) {
         log.Printf("StoreData: %s\n",r.Body,)
+        // Security FixMe: Need to block . .. and / within
+        filename := chi.URLParam(r, "filename")
         body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
         if err != nil {
                 panic(err)
@@ -335,9 +337,9 @@ func StoreData(w http.ResponseWriter, r *http.Request) {
         if err := r.Body.Close(); err != nil {
                 panic(err)
         }
-       dpath := "/Program Files/WindowsNodeManager/data"
+       dpath := "/Program Files/WindowsNodeManager/data/"
        os.MkdirAll(dpath,0700)
-       ioutil.WriteFile(dpath + "one.taz", body, 0700)
+       ioutil.WriteFile(dpath + filename, body, 0700)
        respondwithJSON(w, http.StatusCreated, map[string]string{"message": "successfully created"})
 
 }
