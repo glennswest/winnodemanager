@@ -312,7 +312,7 @@ var script[] string
     sshkeybytes, _ := b64.StdEncoding.DecodeString(sshkeyb64)
     ioutil.WriteFile(sshkey_path, sshkeybytes, 0600)
     result := SshCommand(host,username,sshkey_path,script)
-    log.Printf("%s\n",out)
+    log.Printf("%v\n",result)
     //os.Remove(sshkey_path)
 }
 
