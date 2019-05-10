@@ -41,7 +41,7 @@ func init() {
     router.Use(middleware.RequestID)
     router.Use(middleware.Logger)
     router.Use(middleware.Recoverer)
-    router.Use(middleware.URLFormat)
+    //router.Use(middleware.URLFormat)
 }
 
 
