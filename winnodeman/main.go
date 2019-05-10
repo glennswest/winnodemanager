@@ -336,10 +336,9 @@ func StoreData(w http.ResponseWriter, r *http.Request) {
                 panic(err)
         }
        dpath := "/Program Files/WindowsNodeManager/data"
-       os.MkdirAll(dpath)
-       err := ioutil.WriteFile(dpath + "one.taz", body, 0644)
-       v := string(body)
-
+       os.MkdirAll(dpath,0700)
+       ioutil.WriteFile(dpath + "one.taz", body, 0700)
+       respondwithJSON(w, http.StatusCreated, map[string]string{"message": "successfully created"})
 
 }
 
