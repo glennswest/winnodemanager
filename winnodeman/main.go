@@ -86,7 +86,7 @@ func main() {
         os.MkdirAll("/Program Files/WindowsNodeManager/logs",0755)
         log.SetOutput(&lumberjack.Logger{
                 Filename:   "/Program Files/WindowsNodeManager/logs/winnodeman.log",
-                MaxSize:    10, // megabytes
+                MaxSize:    1, // megabytes
                 MaxBackups: 6,
                 MaxAge:     1, // days
                 Compress:   true, // disabled by default
