@@ -303,7 +303,7 @@ var script[] string
 
     host := GetSetting(d,"master")
     log.Printf("Master host: %s\n",host)
-    username := GetSetting(d,"global.sshuser")
+    username := GetSetting(d,"sshuser")
     os.MkdirAll("/Program Files/WindowsNodeManager/install/",0700)
     sshkey_path := "/Program Files/WindowsNodeManager/install/id"
     sshkeyb64 := GetSetting(d,"sshkey")
