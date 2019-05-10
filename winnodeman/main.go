@@ -312,9 +312,8 @@ var script[] string
     sshkeybytes, _ := b64.StdEncoding.DecodeString(sshkeyb64)
     ioutil.WriteFile(sshkey_path, sshkeybytes, 0600)
     result := SshCommand(host,username,sshkey_path,script)
-    //os.Remove(sshkey_path)
-    out := strings.Join(result,"\n")
     log.Printf("%s\n",out)
+    //os.Remove(sshkey_path)
 }
 
 func process_local_commands(cmds []gjson.Result,nodename string,d string,cname string,md string,itype string){
@@ -440,15 +439,11 @@ var sshout[] string
     defer client.Close()
     for _, c := range cmds {
        log.Printf("SSH: %s\n",c)
-       out, err := client.Cmd(c).Output()
-       if err != nil {
-          log.Printf("Cannot run cmd - %v\n",err)
-          return(sshout)
-          }
-       fmt.Println("> %s\n",string(out))
+       out, _ := client.Cmd(c).Output()
        sshout = append(sshout,string(out))
        }
     return(sshout)
 }
+
 
 
