@@ -293,7 +293,6 @@ var script[] string
        return
        }
     log.Printf("Processing Master Commands - Qty %d\n",l)
-    os.MkdirAll("/Program Files/WindowsNodeManager/install/" + cname + "/" + itype,0755)
     env := envars(d)
     script = append(script,env...)
     log.Printf("script\n")
@@ -304,15 +303,15 @@ var script[] string
 
     host := GetSetting(d,"global.master")
     username := GetSetting(d,"global.sshuser")
+    os.MkdirAll("/Program Files/WindowsNodeManager/install/",0700)
     sshkey_path := "/Program Files/WindowsNodeManager/install/id"
     sshkeyb64 := GetSetting(d,"sshkey")
     sshkeybytes, _ := b64.StdEncoding.DecodeString(sshkeyb64)
     ioutil.WriteFile(sshkey_path, sshkeybytes, 0600)
     result := SshCommand(host,username,sshkey_path,script)
-    os.Remove(sshkey_path)
-    outpath := "/Program Files/WindowsNodeManager/install/" + cname + "/" + itype + "/output.log"
+    //os.Remove(sshkey_path)
     out := strings.Join(result,"\n")
-    ioutil.WriteFile(outpath, []byte(out), 0600)
+    log.Printf("%s\n",out)
 }
 
 func process_local_commands(cmds []gjson.Result,nodename string,d string,cname string,md string,itype string){
@@ -321,7 +320,7 @@ func process_local_commands(cmds []gjson.Result,nodename string,d string,cname s
        return
        }
     log.Printf("Processing Local Commands - Qty %d\n",l)
-    os.MkdirAll("/Program Files/WindowsNodeManager/install/" + cname + "/" + itype,0755)
+    //os.MkdirAll("/Program Files/WindowsNodeManager/install/" + cname + "/" + itype,0755)
 }
 
 // Install a New Machine
