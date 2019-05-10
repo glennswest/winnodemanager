@@ -27,6 +27,7 @@ var router *chi.Mux
 
 func routers() *chi.Mux {
      router.Post("/node/install/{guid}", InstallNode)
+     router.Post("/data", StoreData)
      router.Delete("/node/uninstall/{guid}", UninstallNode)
      router.Put("/node/update/{guid}", UpdateNode)
      router.Get("/healthz",ReadyCheck)
@@ -152,6 +153,7 @@ func ReadFile(thepath string) string {
     str := string(b)
    return str
 }
+
 func DoInstall(nodename string, data string){
     basepath := "/Program Files/WindowsNodeManager"
     os.MkdirAll(basepath + "/settings",0700)
@@ -322,6 +324,23 @@ func process_local_commands(cmds []gjson.Result,nodename string,d string,cname s
        }
     log.Printf("Processing Local Commands - Qty %d\n",l)
     //os.MkdirAll("/Program Files/WindowsNodeManager/install/" + cname + "/" + itype,0755)
+}
+
+func StoreData(w http.ResponseWriter, r *http.Request) {
+        log.Printf("StoreData: %s\n",r.Body,)
+        body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
+        if err != nil {
+                panic(err)
+        }
+        if err := r.Body.Close(); err != nil {
+                panic(err)
+        }
+       dpath := "/Program Files/WindowsNodeManager/data"
+       os.MkdirAll(dpath)
+       err := ioutil.WriteFile(dpath + "one.taz", body, 0644)
+       v := string(body)
+
+
 }
 
 // Install a New Machine
