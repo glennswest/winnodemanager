@@ -301,7 +301,7 @@ var script[] string
           log.Printf("    %s\n",cmd.String())
           }
 
-    host := GetSetting(d,"global.master")
+    host := GetSetting(d,"master")
     log.Printf("Master host: %s\n",host)
     username := GetSetting(d,"global.sshuser")
     os.MkdirAll("/Program Files/WindowsNodeManager/install/",0700)
