@@ -361,7 +361,7 @@ func StoreData(w http.ResponseWriter, r *http.Request) {
 
 // Install a New Machine
 func InstallNode(w http.ResponseWriter, r *http.Request) { 
-    TheLog.Rotate()
+    //TheLog.Rotate()
     log.Printf("InstallNode: %s\n",r.Body,)
         body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 	if err != nil {
