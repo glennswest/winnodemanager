@@ -22,6 +22,7 @@ import (
 
 var builddate string
 var gitversion string 
+var TheLog *lumberjack.Logger
 
 var router *chi.Mux
 
@@ -64,6 +65,7 @@ func (p *program) Stop(s service.Service) error {
 	return nil
 }
 
+
 func main() {
 	svcConfig := &service.Config{
 		Name:        "winnodeman",
@@ -85,13 +87,14 @@ func main() {
 	}
 
         os.MkdirAll("/Program Files/WindowsNodeManager/logs",0755)
-        log.SetOutput(&lumberjack.Logger{
+        TheLog := &lumberjack.Logger{
                 Filename:   "/Program Files/WindowsNodeManager/logs/winnodeman.log",
                 MaxSize:    1, // megabytes
                 MaxBackups: 6,
                 MaxAge:     1, // days
                 Compress:   true, // disabled by default
-                })
+                }
+        log.SetOutput(TheLog)
         log.Printf("winnodemanager restarted - Version: %s - Build Data: %s",gitversion,builddate)
 	err = s.Run()
 	if err != nil {
@@ -344,6 +347,7 @@ func StoreData(w http.ResponseWriter, r *http.Request) {
 
 // Install a New Machine
 func InstallNode(w http.ResponseWriter, r *http.Request) { 
+    TheLog.Rotate()
     log.Printf("InstallNode: %s\n",r.Body,)
         body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 	if err != nil {
