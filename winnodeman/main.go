@@ -326,11 +326,13 @@ func process_local_commands(cmds []gjson.Result,nodename string,d string,cname s
        }
     log.Printf("Processing Local Commands - Qty %d\n",l)
     env := envars(d)
-    script := env
-    for _, cmd := range cmds {
-          script = append(script,cmd.String())
-          }
     pshellcmd := ""
+    for _, ln := range env {
+          if (len(pshellcmd) > 0){
+             pshellcmd = pshellcmd + ";"
+             }
+          pshellcmd = pshellcmd + ln
+          }
     for _, ln := range cmds {
           if (len(pshellcmd) > 0){
              pshellcmd = pshellcmd + ";"
