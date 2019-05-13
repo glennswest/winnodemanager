@@ -296,7 +296,8 @@ var r[] string
           default:
                 k = strings.Replace(k,".","_",-1)
                 k = strings.Replace(k,"/","_",-1)
-                l := "set " + k + "=" + `"` + v + `"`
+                //  $Env:kubernetes_io_hostname
+                l := "$Env:" + k + "+=" + `"` + v + `"`
                 r = append(r,l)
                 }
        return true
