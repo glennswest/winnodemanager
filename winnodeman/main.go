@@ -278,6 +278,32 @@ var r[] string
     return(r)
 
 }
+func win_processvars(d string,vtype string) []string{
+var r[] string
+
+    result := gjson.Get(d, vtype)
+    result.ForEach(func(key, value gjson.Result) bool {
+       k,v := getkeyvalue(value.String())
+       switch(k){
+          case "user":
+                break;
+          case "password":
+                break;
+          case "sshuser":
+                break;
+          case "sshkey":
+                break;
+          default:
+                k = strings.Replace(k,".","_",-1)
+                k = strings.Replace(k,"/","_",-1)
+                l := "set " + k + "=" + `"` + v + `"`
+                r = append(r,l)
+                }
+       return true
+       })
+    return(r)
+
+}
 
 func envars(d string) []string{
 var  r[] string
@@ -285,6 +311,18 @@ var  r[] string
     r  = processvars(d,"settings")
     l := processvars(d,"labels")
     a := processvars(d,"annotations")
+    r  = append(r,l...)
+    r  = append(r,a...)
+    return(r)
+}
+
+
+func win_envars(d string) []string{
+var  r[] string
+
+    r  = win_processvars(d,"settings")
+    l := win_processvars(d,"labels")
+    a := win_processvars(d,"annotations")
     r  = append(r,l...)
     r  = append(r,a...)
     return(r)
@@ -325,7 +363,7 @@ func process_local_commands(cmds []gjson.Result,nodename string,d string,cname s
        return
        }
     log.Printf("Processing Local Commands - Qty %d\n",l)
-    env := envars(d)
+    env := win_envars(d)
     pshellcmd := ""
     for _, ln := range env {
           if (len(pshellcmd) > 0){
