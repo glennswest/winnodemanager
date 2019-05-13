@@ -311,8 +311,7 @@ var script[] string
     sshkeyb64 := GetSetting(d,"sshkey")
     sshkeybytes, _ := b64.StdEncoding.DecodeString(sshkeyb64)
     ioutil.WriteFile(sshkey_path, sshkeybytes, 0600)
-    result := SshCommand(host,username,sshkey_path,script)
-    log.Printf("%v\n",result)
+    SshCommand(host,username,sshkey_path,script)
     //os.Remove(sshkey_path)
 }
 
@@ -440,6 +439,7 @@ var sshout[] string
     for _, c := range cmds {
        log.Printf("SSH: %s\n",c)
        out, _ := client.Cmd(c).Output()
+       log.Printf("ssh: %s\n",string(out))
        sshout = append(sshout,string(out))
        }
     return(sshout)
