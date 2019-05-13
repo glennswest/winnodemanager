@@ -12,6 +12,7 @@ import (
         . "github.com/glennswest/go-sshclient"
         b64 "encoding/base64"
 	"gopkg.in/natefinch/lumberjack.v2"
+        "github.com/glennswest/libpowershell/pshell"
         "strings"
          "os"
          "encoding/json"
@@ -324,7 +325,20 @@ func process_local_commands(cmds []gjson.Result,nodename string,d string,cname s
        return
        }
     log.Printf("Processing Local Commands - Qty %d\n",l)
-    //os.MkdirAll("/Program Files/WindowsNodeManager/install/" + cname + "/" + itype,0755)
+    env := envars(d)
+    script := env
+    for _, cmd := range cmds {
+          script = append(script,cmd.String())
+          }
+    pshellcmd := ""
+    for _, ln := range cmds {
+          if (len(pshellcmd) > 0){
+             pshellcmd = pshellcmd + ";"
+             }
+          pshellcmd = pshellcmd + ln.String()
+          }
+     log.Printf("Powershell: %s\n",pshellcmd)
+     pshell.Powershell(pshellcmd)
 }
 
 func StoreData(w http.ResponseWriter, r *http.Request) {
