@@ -412,7 +412,7 @@ func InstallNode(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
     v := string(body)
-    log.Printf("JSON: %s\n",v)
+    //log.Printf("JSON: %s\n",v)
     hostname := GetLabel(v,`kubernetes\.io/hostname`)
     go DoInstall(hostname, v)
     respondwithJSON(w, http.StatusCreated, map[string]string{"message": "successfully created"})
