@@ -222,6 +222,7 @@ func DoInstall(nodename string, data string){
     WriteFile(spath + "install.state","done")
 }
  
+// Handle the install after restart
 func restart_install(){
     spath := Basepath + "/state/"
     state := ReadFile(spath + "install.state")
