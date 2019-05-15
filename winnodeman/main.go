@@ -21,6 +21,7 @@ import (
          "time"
 )
 
+const Basepath string = "/Program Files/WindowsNodeManager"
 var builddate string
 var gitversion string 
 var TheLog *lumberjack.Logger
@@ -158,15 +159,19 @@ func ReadFile(thepath string) string {
    return str
 }
 
+func WriteFile(thepath string,data string){
+     ioutil.WriteFile(thepath,[]byte(data), 0600)
+}
+
 func DoInstall(nodename string, data string){
-    basepath := "/Program Files/WindowsNodeManager"
-    os.MkdirAll(basepath + "/settings",0700)
-    os.MkdirAll(basepath + "/content",0700)
+    os.MkdirAll(Basepath + "/state",0700)
+    os.MkdirAll(Basepath + "/settings",0700)
+    os.MkdirAll(Basepath + "/content",0700)
     log.Printf("DoInstall: %s - %s",nodename,data)
     urlbase := GetSetting(data,"wmmurl")
     template := GetSetting(data,"template")
     urltemplate := "http://" + urlbase + template
-    templatepath := basepath + "/settings/template.json"
+    templatepath := Basepath + "/settings/template.json"
     log.Printf("Getting template: %s\n",urltemplate)
     err := DownloadFile(urltemplate,templatepath)
     if err != nil {
@@ -179,7 +184,7 @@ func DoInstall(nodename string, data string){
     for _, name := range result.Array() {
           component := name.String()
           log.Printf("Processing Component: %s\n",component)
-          cpath := basepath + "/content/" + component + ".ign"
+          cpath := Basepath + "/content/" + component + ".ign"
           curl  := "http://" + urlbase + "/content/" + component + ".ign"
           err := DownloadFile(curl,cpath)
           if err != nil {
@@ -191,12 +196,16 @@ func DoInstall(nodename string, data string){
     for _, name := range result.Array() {
           component := name.String()
           log.Printf("Using Ignition to Deploy: %s\n",component)
-          cpath := basepath + "/content/" + component + ".ign"
+          cpath := Basepath + "/content/" + component + ".ign"
           status := ignition.Parse_ignition_file(cpath)
           if (status != 0){
              log.Printf("Failed Deployment for component %s\n",component)
              }
           }
+    spath := Basepath + "/state/"
+    WriteFile(spath + "nodename.state",nodename)
+    WriteFile(spath + "data.state",data)
+    WriteFile(spath + "install.state","running")
     log.Printf("Starting Command Execution from Components\n")
     for _, name := range result.Array() {
           component := name.String()
@@ -209,10 +218,60 @@ func DoInstall(nodename string, data string){
              log.Printf("Missing metadata for component: %s\n",component)
              }
           }
-
+    WriteFile(spath + "install.state","done")
 }
+ 
+func restart_install(){
+    spath := Basepath + "/state/"
+    state := ReadFile(spath + "install.state")
+    switch(state){
+       case "":
+            log.Printf("restart_install: No Install pending\n")
+            return
+            break
+       case "running":
+            log.Printf("restart_install: Continue Install\n")
+
+       case "done":
+            log.Printf("restart_install: Install Completed - Not Restarting\n")
+            return
+            break
+       default:
+            log.Printf("restart_install: Unknown State - Not retrying\n")
+            return
+            break
+       }
+    nodename := ReadFile(spath + "nodename.state")
+    data     := ReadFile(spath + "data.state")
+    templatepath := Basepath + "/settings/template.json"
+    tdata := ReadFile(templatepath)
+    result := gjson.Get(tdata, "packages")
+    for _, name := range result.Array() {
+          component := name.String()
+          mpath := "/bin/metadata/" + component + ".metadata"
+          md := ReadFile(mpath)
+          if (len(md) > 0){
+             process_install_metadata(nodename,data,component,md)
+             } else {
+             log.Printf("Missing metadata for component: %s\n",component)
+             }
+          }
+}     
 
 func process_install_metadata(nodename string,d string,cname string,md string){
+     spath := Basepath + "/state/" + "component/" + cname
+     os.MkdirAll(spath,0700)
+     state := ReadFile(spath)
+     switch(state){
+        case "":   // Empty or no file = Not Started
+             break
+        case "done":
+             log.Printf("Skipping completed component %s\n",cname)
+             return
+             break;
+         default:
+             break
+         }
      log.Printf("Processing %s metadata\n",cname)
      description := gjson.Get(md,"description").String()
      imessage := gjson.Get(md,"install_message").String()
@@ -232,6 +291,7 @@ func process_install_metadata(nodename string,d string,cname string,md string){
      process_master_commands(lprecmds,nodename,d,cname,md,"lprecmds")
      process_local_commands(commands,nodename,d,cname,md,"commands")
      process_master_commands(lpstcmds,nodename,d,cname,md,"lpstcmds")
+     WriteFile(spath,"done")
 }
 
 func trimQuotes(s string) string {
