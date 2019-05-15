@@ -168,7 +168,7 @@ func DoInstall(nodename string, data string){
     os.MkdirAll(Basepath + "/state",0700)
     os.MkdirAll(Basepath + "/settings",0700)
     os.MkdirAll(Basepath + "/content",0700)
-    log.Printf("DoInstall: %s - %s",nodename,data)
+    log.Printf("DoInstall: %s ",nodename)
     urlbase := GetSetting(data,"wmmurl")
     template := GetSetting(data,"template")
     urltemplate := "http://" + urlbase + template
@@ -402,10 +402,8 @@ var script[] string
     log.Printf("Processing Master Commands - Qty %d\n",l)
     env := envars(d)
     script = append(script,env...)
-    log.Printf("script\n")
     for _, cmd := range cmds {
           script = append(script,cmd.String())
-          log.Printf("    %s\n",cmd.String())
           }
 
     host := GetSetting(d,"master")
@@ -440,7 +438,6 @@ func process_local_commands(cmds []gjson.Result,nodename string,d string,cname s
              }
           pshellcmd = pshellcmd + ln.String()
           }
-     log.Printf("Powershell: %s\n",pshellcmd)
      pshell.Powershell(pshellcmd)
 }
 
