@@ -423,6 +423,11 @@ func process_local_commands(cmds []gjson.Result,nodename string,d string,cname s
     if (l == 0){
        return
        }
+    username := GetSetting(d,"user")
+    password := GetSetting(d,"password")
+    hostip   := GetAnnotation(d,"host/ip")
+    //log.Printf("Username: %s Password: %s\n:",username,password)
+    pshell.SetRemoteMode(hostip,username,password)
     log.Printf("Processing Local Commands - Qty %d\n",l)
     env := win_envars(d)
     pshellcmd := ""
