@@ -492,7 +492,10 @@ func UninstallNode(w http.ResponseWriter, r *http.Request) {
     id := chi.URLParam(r, "id")
     log.Printf("Uninstall Node: id:%s %s\n", id, r.Body)
     os.RemoveAll(Basepath + "/state")
-    os.MkdirAll(Basepath + "/state",0700)
+    os.RemoveAll(Basepath + "/settings")
+    os.RemoveAll(Basepath + "/content")
+    os.RemoveAll(Basepath + "/install")
+    os.RemoveAll(Basepath + "/data")
     respondwithJSON(w, http.StatusOK, map[string]string{"message": "update successfully"})
 
 }
