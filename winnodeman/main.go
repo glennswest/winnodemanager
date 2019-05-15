@@ -59,6 +59,7 @@ func (p *program) Start(s service.Service) error {
 func (p *program) run() {
 	// Do work here
         go EnableRestServices()
+        go restart_install()
 }
 
 func (p *program) Stop(s service.Service) error {
