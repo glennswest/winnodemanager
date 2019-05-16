@@ -287,13 +287,13 @@ func process_install_metadata(nodename string,d string,cname string,md string){
      if (len(url) > 0){
         log.Printf("Using content from: %s\n",url)
         }
+     WriteFile(spath,"done")  // So if we reboot it will skip it next time
      lprecmds := gjson.Get(md,"install.lprecmds").Array()
      commands := gjson.Get(md,"install.commands").Array()
      lpstcmds := gjson.Get(md,"install.lpstcmds").Array()
      process_master_commands(lprecmds,nodename,d,cname,md,"lprecmds")
      process_local_commands(commands,nodename,d,cname,md,"commands")
      process_master_commands(lpstcmds,nodename,d,cname,md,"lpstcmds")
-     WriteFile(spath,"done")
 }
 
 func trimQuotes(s string) string {
