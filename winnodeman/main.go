@@ -153,7 +153,7 @@ func DownloadFile(theurl string, filepath string) error{
 func ReadFile(thepath string) string {
     b, err := ioutil.ReadFile(thepath) // just pass the file name
     if err != nil {
-        log.Print(err)
+        //log.Print(err)
         return ""
     }
     str := string(b)
