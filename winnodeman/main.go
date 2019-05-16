@@ -261,8 +261,7 @@ func restart_install(){
 }     
 
 func process_install_metadata(nodename string,d string,cname string,md string){
-     spath := Basepath + "/state/" + "component/" + cname
-     os.MkdirAll(spath,0700)
+     spath := Basepath + "/state/" + cname
      state := ReadFile(spath)
      switch(state){
         case "":   // Empty or no file = Not Started
