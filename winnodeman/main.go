@@ -98,7 +98,7 @@ func main() {
                 Compress:   true, // disabled by default
                 }
         log.SetOutput(TheLog)
-        log.Printf("winnodemanager restarted - version: %s - build Data: %s",gitversion,builddate)
+        log.Printf("Winnodemanager restarted - version: %s - build Data: %s",gitversion,builddate)
 	err = s.Run()
 	if err != nil {
 		log.Fatalf("Cannot Run: %v",err)
