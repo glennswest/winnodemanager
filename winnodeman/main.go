@@ -243,6 +243,9 @@ func restart_install(){
             return
             break
        }
+    log.Printf("Waiting for system to stablize\n")
+    time.Sleep(180 * time.Second)
+    log.Printf("Install process proceeding\n")
     nodename := ReadFile(spath + "nodename.state")
     data     := ReadFile(spath + "data.state")
     templatepath := Basepath + "/settings/template.json"
