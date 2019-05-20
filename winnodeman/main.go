@@ -554,8 +554,6 @@ func GetSetting(v string,l string) string{
 
 func SshCommand(host string,username string,keypath string,cmds []string) []string{
 var sshout[] string
-var stdout bytes.Buffer
-var stderr bytes.Buffer
 
     hp := host
     if (strings.ContainsAny(hp,":") == false){
