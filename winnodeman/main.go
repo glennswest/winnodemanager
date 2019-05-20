@@ -554,6 +554,8 @@ func GetSetting(v string,l string) string{
 
 func SshCommand(host string,username string,keypath string,cmds []string) []string{
 var sshout[] string
+var stdout bytes.Buffer
+var stderr bytes.Buffer
 
     hp := host
     if (strings.ContainsAny(hp,":") == false){
@@ -568,7 +570,7 @@ var sshout[] string
     defer client.Close()
     for _, c := range cmds {
        log.Printf("SSH: %s\n",c)
-       out, _ := client.Cmd(c).Output()
+       out, _ := client.Cmd(c).SmartOutput()
        log.Printf("ssh: %s\n",string(out))
        sshout = append(sshout,string(out))
        }
