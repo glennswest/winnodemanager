@@ -323,6 +323,8 @@ var r[] string
     result.ForEach(func(key, value gjson.Result) bool {
        k,v := getkeyvalue(value.String())
        switch(k){
+          case "wmmurl":
+               break;
           case "user":
                 break;
           case "password":
@@ -349,6 +351,8 @@ var r[] string
     result.ForEach(func(key, value gjson.Result) bool {
        k,v := getkeyvalue(value.String())
        switch(k){
+          case "wmmurl":
+               break;
           case "user":
                 break;
           case "password":
