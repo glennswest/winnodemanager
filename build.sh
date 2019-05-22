@@ -6,6 +6,6 @@ cp winnodeman.exe ../wcontent/content
 cp winnodeman.version ../wcontent/content
 export GITREASON=`git log -1 --pretty="winnodeman: %cd %h %ae %s"`
 echo ${GITREASON} >> ../wcontent/updates.md
-(cd ../wcontent;git add content/winnodeman.exe;git add content/winnodeman.version;git commit -a -m \"${GITREASON}\";git push origin master)
+(cd ../wcontent;git add content/winnodeman.exe;git add content/winnodeman.version;git commit -a -m "Update winnodeman executable"";git push origin master)
 
 
