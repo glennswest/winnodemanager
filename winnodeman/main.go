@@ -171,7 +171,7 @@ func DoInstall(nodename string, data string){
     log.Printf("DoInstall: %s ",nodename)
     urlbase := GetSetting(data,"wmmurl")
     template := GetSetting(data,"template")
-    urltemplate := "http://" + urlbase + template
+    urltemplate := urlbase + template
     templatepath := Basepath + "/settings/template.json"
     log.Printf("Getting template: %s\n",urltemplate)
     err := DownloadFile(urltemplate,templatepath)
@@ -552,8 +552,7 @@ func GetSetting(v string,l string) string{
     return x
 }
 
-func SshCommand(host string,username string,keypath string,cmds []string) []string{
-var sshout[] string
+func SshCommand(host string,username string,keypath string,cmds []string) string{
 
     hp := host
     if (strings.ContainsAny(hp,":") == false){
@@ -563,17 +562,22 @@ var sshout[] string
     client, err := DialWithKey(hp, username, keypath)
     if (err != nil){
        log.Printf("SSHCommand: Cannot Connect to %s - %v\n",host,err)
-       return(sshout)
+       return("")
        }
     defer client.Close()
+    lc := ""
     for _, c := range cmds {
-       log.Printf("SSH: %s\n",c)
-       out, _ := client.Cmd(c).SmartOutput()
-       log.Printf("ssh: %s\n",string(out))
-       sshout = append(sshout,string(out))
+       if (len(lc) > 0){
+          lc = lc + "; "
+          }
+       lc = lc + c
        }
-    return(sshout)
+    log.Printf("%s\n",lc)
+    out, err := client.Cmd(lc).SmartOutput()
+    if (err != nil){
+          log.Printf("SSHCommand: Cannot send cmd: %v\n",err)
+          }
+    log.Printf("ssh: %s\n",string(out))
+    return(string(out))
 }
-
-
 
