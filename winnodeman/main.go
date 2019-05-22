@@ -118,7 +118,7 @@ func AliveCheck(w http.ResponseWriter, r *http.Request) {
 
 func DownloadFile(theurl string, filepath string) error{
 // Create the file
-  log.Printf("DownloadFile: %s -> %s\n",theurl,filepath)
+  log.Printf("Download File: %s -> %s\n",theurl,filepath)
   out, err := os.Create(filepath)
   if err != nil  {
     log.Printf("Cannot Create File: %v\n",err)
