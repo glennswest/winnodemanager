@@ -220,6 +220,7 @@ func DoInstall(nodename string, data string){
              }
           }
     WriteFile(spath + "install.state","done")
+    log.Printf("Install Complete\n")
 }
  
 // Handle the install after restart
@@ -453,9 +454,9 @@ func process_local_commands(cmds []gjson.Result,nodename string,d string,cname s
 }
 
 func StoreData(w http.ResponseWriter, r *http.Request) {
-        log.Printf("StoreData: %s\n",r.Body,)
         // Security FixMe: Need to block . .. and / within
         filename := chi.URLParam(r, "filename")
+        log.Printf("StoreData: %s\n",filename)
         body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
         if err != nil {
                 panic(err)
