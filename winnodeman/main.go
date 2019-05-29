@@ -4,8 +4,10 @@ import (
 	"net/http"
         "io"
 	"io/ioutil"
+        "net"
 	"github.com/go-chi/chi"
         "github.com/go-chi/chi/middleware"
+        "github.com/tidwall/sjson"
         "github.com/tidwall/gjson"
         "github.com/glennswest/libignition/ignition"
 	"github.com/kardianos/service"
@@ -168,7 +170,7 @@ func DoInstall(nodename string, data string){
     // Make sure we have master ip
     master := GetSetting(data,"master")
     masterip,_ := net.LookupHost(master)
-    data = ArAdd(data,"settings","masterip",masterip)
+    data = ArAdd(data,"settings","masterip",masterip[0])
 
     os.MkdirAll(Basepath + "/state",0700)
     os.MkdirAll(Basepath + "/settings",0700)
