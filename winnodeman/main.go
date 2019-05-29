@@ -165,6 +165,11 @@ func WriteFile(thepath string,data string){
 }
 
 func DoInstall(nodename string, data string){
+    // Make sure we have master ip
+    master := GetSetting(data,"master")
+    masterip,_ := net.LookupHost(master)
+    data = ArAdd(data,"settings","masterip",masterip)
+
     os.MkdirAll(Basepath + "/state",0700)
     os.MkdirAll(Basepath + "/settings",0700)
     os.MkdirAll(Basepath + "/content",0700)
@@ -556,6 +561,13 @@ func GetSetting(v string,l string) string{
     x = strings.Replace(x, `"`, "", -1)
     return x
 }
+
+func ArAdd(d string,aname string,v1 string,v2 string) string{
+      s := `{"` + v1 + `":"` + v2 + `"}`
+      a := aname + ".-1"
+      d,_ = sjson.SetRaw(d,a,s)
+      return d
+      }
 
 func SshCommand(host string,username string,keypath string,cmds []string) string{
 
