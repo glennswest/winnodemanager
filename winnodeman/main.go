@@ -174,8 +174,10 @@ func DoInstall(nodename string, data string){
 
     os.MkdirAll(Basepath + "/state",0700)
     os.MkdirAll(Basepath + "/settings",0700)
+    os.MkdirAll(Basepath + "/settings/env",0700)
     os.MkdirAll(Basepath + "/content",0700)
     log.Printf("DoInstall: %s ",nodename)
+    win_writevars(data)
     urlbase := GetSetting(data,"wmmurl")
     template := GetSetting(data,"template")
     urltemplate := urlbase + template
@@ -358,6 +360,7 @@ var r[] string
     result := gjson.Get(d, vtype)
     result.ForEach(func(key, value gjson.Result) bool {
        k,v := getkeyvalue(value.String())
+       if (len(v) < 128){
        switch(k){
           case "wmmurl":
                break;
@@ -375,6 +378,47 @@ var r[] string
                 //  $Env:kubernetes_io_hostname
                 l := "$Env:" + k + "=" + `"` + v + `"`
                 r = append(r,l)
+                }
+          }
+       return true
+       })
+    return(r)
+
+}
+
+func IsBase64(s string) bool {
+	_, err := b64.StdEncoding.DecodeString(s)
+	return err == nil
+}
+
+func win_savevars(d string,vtype string) []string{
+var r[] string
+
+    envpath := Basepath + "/settings/env/" + vtype
+    result := gjson.Get(d, vtype)
+    result.ForEach(func(key, value gjson.Result) bool {
+       k,v := getkeyvalue(value.String())
+       switch(k){
+          case "wmmurl":
+               break;
+          case "user":
+                break;
+          case "password":
+                break;
+          case "sshuser":
+                break;
+          case "sshkey":
+                break;
+          default:
+                k = strings.Replace(k,".","_",-1)
+                k = strings.Replace(k,"/","_",-1)
+                thepath := envpath + "/" + k
+                vx := v
+                if (IsBase64(v)){
+                   vxb,_ := b64.StdEncoding.DecodeString(v)
+                   vx = string(vxb)
+                   }
+                WriteFile(thepath,vx)
                 }
        return true
        })
@@ -403,6 +447,13 @@ var  r[] string
     r  = append(r,l...)
     r  = append(r,a...)
     return(r)
+}
+
+func win_writevars(d string){
+
+    win_savevars(d,"settings")
+    win_savevars(d,"labels")
+    win_savevars(d,"annotations")
 }
 
 
