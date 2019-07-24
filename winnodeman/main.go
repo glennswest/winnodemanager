@@ -175,6 +175,10 @@ func DoInstall(nodename string, data string){
     os.MkdirAll(Basepath + "/state",0700)
     os.MkdirAll(Basepath + "/settings",0700)
     os.MkdirAll(Basepath + "/settings/env",0700)
+    os.MkdirAll(Basepath + "/settings/env/settings",0700)
+    os.MkdirAll(Basepath + "/settings/env/labels",0700)
+    os.MkdirAll(Basepath + "/settings/env/annotations",0700)
+    
     os.MkdirAll(Basepath + "/content",0700)
     log.Printf("DoInstall: %s ",nodename)
     win_writevars(data)
