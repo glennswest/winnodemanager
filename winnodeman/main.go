@@ -418,6 +418,7 @@ var r[] string
                    vxb,_ := b64.StdEncoding.DecodeString(v)
                    vx = string(vxb)
                    }
+                log.Printf("%s -> %s",thepath,vx)
                 WriteFile(thepath,vx)
                 }
        return true
