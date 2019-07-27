@@ -258,7 +258,7 @@ func restart_install(){
             break
        }
     log.Printf("Waiting for system to stablize\n")
-    time.Sleep(180 * time.Second)
+    time.Sleep(90 * time.Second)
     log.Printf("Install process proceeding\n")
     nodename := ReadFile(spath + "nodename.state")
     data     := ReadFile(spath + "data.state")
@@ -422,7 +422,6 @@ var r[] string
                    vxb,_ := b64.StdEncoding.DecodeString(v)
                    vx = string(vxb)
                    }
-                log.Printf("%s -> %s",thepath,vx)
                 WriteFile(thepath,vx)
                 }
        return true
