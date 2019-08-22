@@ -524,6 +524,7 @@ func process_local_commands(cmds []gjson.Result,nodename string,d string,cname s
     password := GetSetting(d,"password")
     hostip   := GetAnnotation(d,"host/ip")
     //log.Printf("Username: %s Password: %s\n:",username,password)
+    donepath := "/k/tmp/" + cname + ".done"
     pshell.SetRemoteMode(hostip,username,password)
     log.Printf("Processing Local Commands - Qty %d\n",l)
     env := win_envars(d)
@@ -540,11 +541,11 @@ func process_local_commands(cmds []gjson.Result,nodename string,d string,cname s
              }
           pshellcmd = pshellcmd + ln.String()
           }
+     pshellcmd = pshellcmd + "; echo $null >> " + donepath
      thepath := "/bin/run_" + cname + ".ps1"
      WriteFile(thepath,pshellcmd)
      cmd := thepath + " *> " + "/k/logs/run_" + cname + ".out"
-     donepath := "/k/tmp/" + cname + ".done"
-     spcmd := "Start-Process \"powershell\" -args \"" + cmd + "\" -NoNewWindow -Wait; echo $null >> " + donepath
+     spcmd := "Start-Process \"powershell\" -args \"" + cmd + "\" -NoNewWindow -Wait"
      pshell.Powershell(spcmd)
      wait_for_file(donepath)
 }
