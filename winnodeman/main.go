@@ -514,6 +514,7 @@ func process_local_commands(cmds []gjson.Result,nodename string,d string,cname s
           }
      thepath := "/bin/run_" + cname + ".ps1"
      WriteFile(thepath,pshellcmd)
+     cmd := thepath + " 2>&1 > " + "/k/logs/run_" + cname + ".out"
      pshell.Powershell(thepath)
 }
 
