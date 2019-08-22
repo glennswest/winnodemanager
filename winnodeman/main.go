@@ -513,7 +513,7 @@ func process_local_commands(cmds []gjson.Result,nodename string,d string,cname s
           pshellcmd = pshellcmd + ln.String()
           }
      thepath := "/bin/run_" + cname + ".ps1"
-     ioutil.WriteFile(thepath,pshellcmd,0600)
+     WriteFile(thepath,pshellcmd)
      pshell.Powershell(thepath)
 }
 
