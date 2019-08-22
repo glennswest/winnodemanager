@@ -487,6 +487,34 @@ var script[] string
     //os.Remove(sshkey_path)
 }
 
+func wait_for_file(filename string){
+
+        total_time := 0;
+        time_limit := 60 * 15 // 15 Minutes
+	for {
+          if (fileExists(filename)){
+             return
+             }
+         time.Sleep(2 * time.Second)
+         total_time = total_time + 2
+         if (total_time > time_limit){
+            log.Printf("Timout waiting for done file %s\n",filename)
+            return
+            }
+         }
+
+
+
+}
+
+func fileExists(filename string) bool {
+    info, err := os.Stat(filename)
+    if os.IsNotExist(err) {
+        return false
+    }
+    return !info.IsDir()
+}
+
 func process_local_commands(cmds []gjson.Result,nodename string,d string,cname string,md string,itype string){
     l := len(cmds)
     if (l == 0){
@@ -515,8 +543,10 @@ func process_local_commands(cmds []gjson.Result,nodename string,d string,cname s
      thepath := "/bin/run_" + cname + ".ps1"
      WriteFile(thepath,pshellcmd)
      cmd := thepath + " *> " + "/k/logs/run_" + cname + ".out"
-     spcmd := "Start-Process \"powershell\" -args \"" + cmd + "\" -NoNewWindow -Wait"
+     donepath := "/k/tmp/" + cname + ".done"
+     spcmd := "Start-Process \"powershell\" -args \"" + cmd + "\" -NoNewWindow -Wait; echo $null >> " + donepath
      pshell.Powershell(spcmd)
+     wait_for_file(donepath)
 }
 
 func StoreData(w http.ResponseWriter, r *http.Request) {
