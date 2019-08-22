@@ -514,8 +514,9 @@ func process_local_commands(cmds []gjson.Result,nodename string,d string,cname s
           }
      thepath := "/bin/run_" + cname + ".ps1"
      WriteFile(thepath,pshellcmd)
-     cmd := thepath + " *> " + "/k/logs/run_" + cname + ".out | Out-Null"
-     pshell.Powershell(cmd)
+     cmd := thepath + " *> " + "/k/logs/run_" + cname + ".out"
+     spcmd := "Start-Process \"powershell\" -args \"" + cmd + "\" -NoNewWindow -Wait"
+     pshell.Powershell(spcmd)
 }
 
 func StoreData(w http.ResponseWriter, r *http.Request) {
