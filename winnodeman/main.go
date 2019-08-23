@@ -14,6 +14,7 @@ import (
         . "github.com/glennswest/go-sshclient"
         b64 "encoding/base64"
 	"gopkg.in/natefinch/lumberjack.v2"
+        "github.com/capnspacehook/taskmaster"
         "github.com/glennswest/libpowershell/pshell"
         "strings"
          "os"
@@ -518,7 +519,6 @@ func fileExists(filename string) bool {
 
 func schedule_task(thepath string,thename string){
 
-        //taskService, _ := taskmaster.Connect("", "", "", "")
         taskService, _ := taskmaster.Connect("", "", "", "")
         defer taskService.Disconnect()
 
