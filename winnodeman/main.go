@@ -566,7 +566,7 @@ func process_local_commands(cmds []gjson.Result,nodename string,d string,cname s
           pshellcmd = pshellcmd + ln
           }
     scheduled_job := false
-    if (cmds[0] == "#job"){
+    if (cmds[0].String() == "#job"){
        scheduled_job = true
        }
     for _, ln := range cmds {
