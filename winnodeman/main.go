@@ -515,6 +515,39 @@ func fileExists(filename string) bool {
     return !info.IsDir()
 }
 
+func main() {
+        schedule_task("run_node_2.0.0.ps1","run_node_2.0.0")
+}
+
+func schedule_task(thepath string,thename string){
+
+        //taskService, _ := taskmaster.Connect("", "", "", "")
+        taskService, _ := taskmaster.Connect("", "", "", "")
+        defer taskService.Disconnect()
+
+        newTaskDef := taskService.NewTaskDefinition()
+
+        cmd :=  "-windowstyle hidden -ExecutionPolicy Unrestricted -NonInteractive " + thepath  + " *> C:\\k\\logs\\" + thename + ".out"
+        newTaskDef.AddExecAction("powershell",cmd,"","")
+        newTaskDef.RegistrationInfo.Author = "WinNodeManager"
+        newTaskDef.RegistrationInfo.Description = thename
+        newTaskDef.Principal.UserID = "SYSTEM"
+        taskpath := "\\WinNodeManager\\" + thename
+
+        log.Printf("Taskpath: %s\n",taskpath)
+        newTask, _, err  := taskService.CreateTask(taskpath, newTaskDef, true)
+        if (err != nil){
+           panic(err)
+           }
+        log.Printf("Run it\n")
+        running_task, err := newTask.Run([]string{thename})
+        log.Printf("%v",running_task)
+        if (err != nil){
+           panic(err)
+           }
+}
+
+
 func process_local_commands(cmds []gjson.Result,nodename string,d string,cname string,md string,itype string){
     l := len(cmds)
     if (l == 0){
@@ -535,6 +568,10 @@ func process_local_commands(cmds []gjson.Result,nodename string,d string,cname s
              }
           pshellcmd = pshellcmd + ln
           }
+    scheduled_job := false
+    if (cmds[0] == "#job"){
+       scheduled_job = true
+       }
     for _, ln := range cmds {
           if (len(pshellcmd) > 0){
              pshellcmd = pshellcmd + ";"
@@ -546,7 +583,11 @@ func process_local_commands(cmds []gjson.Result,nodename string,d string,cname s
      WriteFile(thepath,pshellcmd)
      cmd := thepath + " *> " + "/k/logs/run_" + cname + ".out"
      spcmd := "Start-Process \"powershell\" -args \"" + cmd + "\" -NoNewWindow -Wait"
-     pshell.Powershell(spcmd)
+     if (scheduled_job == true){
+        schedule_task(thepath,cname)
+      } else {
+        pshell.Powershell(spcmd)
+      }
      wait_for_file(donepath)
 }
 
