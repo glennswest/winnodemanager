@@ -515,9 +515,6 @@ func fileExists(filename string) bool {
     return !info.IsDir()
 }
 
-func main() {
-        schedule_task("run_node_2.0.0.ps1","run_node_2.0.0")
-}
 
 func schedule_task(thepath string,thename string){
 
