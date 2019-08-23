@@ -11,12 +11,10 @@ import (
         "github.com/tidwall/gjson"
         "github.com/glennswest/libignition/ignition"
 	"github.com/kardianos/service"
-        "github.com/rickb777/date/period"
         . "github.com/glennswest/go-sshclient"
         b64 "encoding/base64"
 	"gopkg.in/natefinch/lumberjack.v2"
         "github.com/glennswest/libpowershell/pshell"
-        "github.com/capnspacehook/taskmaster"
         "strings"
          "os"
          "encoding/json"
@@ -260,7 +258,7 @@ func restart_install(){
             break
        }
     log.Printf("Waiting for system to stablize\n")
-    time.Sleep(180 * time.Second)
+    time.Sleep(90 * time.Second)
     log.Printf("Install process proceeding\n")
     nodename := ReadFile(spath + "nodename.state")
     data     := ReadFile(spath + "data.state")
@@ -424,7 +422,6 @@ var r[] string
                    vxb,_ := b64.StdEncoding.DecodeString(v)
                    vx = string(vxb)
                    }
-                log.Printf("%s -> %s",thepath,vx)
                 WriteFile(thepath,vx)
                 }
        return true
@@ -490,23 +487,32 @@ var script[] string
     //os.Remove(sshkey_path)
 }
 
-func schedule_task(thepath string,thename string){
+func wait_for_file(filename string){
 
-	taskService, _ := taskmaster.Connect("", "", "System", "")
-	defer taskService.Disconnect()
+        total_time := 0;
+        time_limit := 60 * 15 // 15 Minutes
+	for {
+          if (fileExists(filename)){
+             return
+             }
+         time.Sleep(2 * time.Second)
+         total_time = total_time + 2
+         if (total_time > time_limit){
+            log.Printf("Timout waiting for done file %s\n",filename)
+            return
+            }
+         }
 
-	newTaskDef := taskService.NewTaskDefinition()
 
-	newTaskDef.AddExecAction("C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe",thepath,"", "")
-	newTaskDef.RegistrationInfo.Author = "WinNodeManager"
-	newTaskDef.RegistrationInfo.Description = thename
-        newTaskDef.AddTimeTrigger(period.NewHMS(0, 0, 0), time.Now().Add(5*time.Second))
-        taskpath := "\\WinNodeManager\\" + thename
 
-	_, _, err = taskService.CreateTask(taskpath, newTaskDef, true)
-	if err != nil {
-		panic(err)
-	}
+}
+
+func fileExists(filename string) bool {
+    info, err := os.Stat(filename)
+    if os.IsNotExist(err) {
+        return false
+    }
+    return !info.IsDir()
 }
 
 func process_local_commands(cmds []gjson.Result,nodename string,d string,cname string,md string,itype string){
@@ -518,6 +524,7 @@ func process_local_commands(cmds []gjson.Result,nodename string,d string,cname s
     password := GetSetting(d,"password")
     hostip   := GetAnnotation(d,"host/ip")
     //log.Printf("Username: %s Password: %s\n:",username,password)
+    donepath := "/k/tmp/" + cname + ".done"
     pshell.SetRemoteMode(hostip,username,password)
     log.Printf("Processing Local Commands - Qty %d\n",l)
     env := win_envars(d)
@@ -528,23 +535,19 @@ func process_local_commands(cmds []gjson.Result,nodename string,d string,cname s
              }
           pshellcmd = pshellcmd + ln
           }
-    scheduled_task := false
-    if (cmds[0] == "#task"){
-       scheduled_task = true
-       }
     for _, ln := range cmds {
           if (len(pshellcmd) > 0){
              pshellcmd = pshellcmd + ";"
              }
           pshellcmd = pshellcmd + ln.String()
           }
+     pshellcmd = pshellcmd + "; echo $null >> " + donepath
      thepath := "/bin/run_" + cname + ".ps1"
-     ioutil.WriteFile(thepath,pshellcmd,0600)
-     if (scheduled_task == false){
-        pshell.Powershell(thepath)
-       } else {
-        schedule_task(thepath,cname)
-       }
+     WriteFile(thepath,pshellcmd)
+     cmd := thepath + " *> " + "/k/logs/run_" + cname + ".out"
+     spcmd := "Start-Process \"powershell\" -args \"" + cmd + "\" -NoNewWindow -Wait"
+     pshell.Powershell(spcmd)
+     wait_for_file(donepath)
 }
 
 func StoreData(w http.ResponseWriter, r *http.Request) {
