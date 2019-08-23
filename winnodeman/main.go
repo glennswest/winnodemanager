@@ -571,7 +571,7 @@ func process_local_commands(cmds []gjson.Result,nodename string,d string,cname s
        }
     for _, ln := range cmds {
           theline := ln.String()
-          if theline[0] == "#"){
+          if (theline[0] == "#"){
              theline = ""
              }
           if (len(pshellcmd) > 0){
