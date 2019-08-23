@@ -539,6 +539,7 @@ func schedule_task(thepath string,thename string){
         log.Printf("Run it\n")
         running_task, err := newTask.Run([]string{thename})
         log.Printf("ScheduleJob: %s\n",cmd)
+        log.Printf("Task: %v\n",running_task)
         if (err != nil){
            log.Printf("Error: %v",err)
            }
@@ -571,7 +572,7 @@ func process_local_commands(cmds []gjson.Result,nodename string,d string,cname s
        }
     for _, ln := range cmds {
           theline := ln.String()
-          if (theline[0] == "#"){
+          if (theline[0] == '#'){
              theline = ""
              }
           if (len(pshellcmd) > 0){
