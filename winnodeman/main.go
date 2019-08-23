@@ -538,9 +538,9 @@ func schedule_task(thepath string,thename string){
            }
         log.Printf("Run it\n")
         running_task, err := newTask.Run([]string{thename})
-        log.Printf("%v",running_task)
+        log.Printf("ScheduleJob: %s\n",cmd)
         if (err != nil){
-           panic(err)
+           log.Printf("Error: %v",err)
            }
 }
 
@@ -570,10 +570,14 @@ func process_local_commands(cmds []gjson.Result,nodename string,d string,cname s
        scheduled_job = true
        }
     for _, ln := range cmds {
+          theline := ln.String()
+          if theline[0] == "#"){
+             theline = ""
+             }
           if (len(pshellcmd) > 0){
              pshellcmd = pshellcmd + ";"
              }
-          pshellcmd = pshellcmd + ln.String()
+          pshellcmd = pshellcmd + theline
           }
      pshellcmd = pshellcmd + "; echo $null >> " + donepath
      thepath := "/bin/run_" + cname + ".ps1"
