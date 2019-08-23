@@ -11,10 +11,12 @@ import (
         "github.com/tidwall/gjson"
         "github.com/glennswest/libignition/ignition"
 	"github.com/kardianos/service"
+        "github.com/rickb777/date/period"
         . "github.com/glennswest/go-sshclient"
         b64 "encoding/base64"
 	"gopkg.in/natefinch/lumberjack.v2"
         "github.com/glennswest/libpowershell/pshell"
+        "github.com/capnspacehook/taskmaster"
         "strings"
          "os"
          "encoding/json"
@@ -488,6 +490,25 @@ var script[] string
     //os.Remove(sshkey_path)
 }
 
+func schedule_task(thepath string,thename string){
+
+	taskService, _ := taskmaster.Connect("", "", "System", "")
+	defer taskService.Disconnect()
+
+	newTaskDef := taskService.NewTaskDefinition()
+
+	newTaskDef.AddExecAction("C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe",thepath,"", "")
+	newTaskDef.RegistrationInfo.Author = "WinNodeManager"
+	newTaskDef.RegistrationInfo.Description = thename
+        newTaskDef.AddTimeTrigger(period.NewHMS(0, 0, 0), time.Now().Add(5*time.Second))
+        taskpath := "\\WinNodeManager\\" + thename
+
+	_, _, err = taskService.CreateTask(taskpath, newTaskDef, true)
+	if err != nil {
+		panic(err)
+	}
+}
+
 func process_local_commands(cmds []gjson.Result,nodename string,d string,cname string,md string,itype string){
     l := len(cmds)
     if (l == 0){
@@ -507,6 +528,10 @@ func process_local_commands(cmds []gjson.Result,nodename string,d string,cname s
              }
           pshellcmd = pshellcmd + ln
           }
+    scheduled_task := false
+    if (cmds[0] == "#task"){
+       scheduled_task = true
+       }
     for _, ln := range cmds {
           if (len(pshellcmd) > 0){
              pshellcmd = pshellcmd + ";"
@@ -515,7 +540,11 @@ func process_local_commands(cmds []gjson.Result,nodename string,d string,cname s
           }
      thepath := "/bin/run_" + cname + ".ps1"
      ioutil.WriteFile(thepath,pshellcmd,0600)
-     pshell.Powershell(thepath)
+     if (scheduled_task == false){
+        pshell.Powershell(thepath)
+       } else {
+        schedule_task(thepath,cname)
+       }
 }
 
 func StoreData(w http.ResponseWriter, r *http.Request) {
